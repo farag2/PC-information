@@ -1,4 +1,3 @@
-# Информация о ПК
 Write-Output User
 $PCName = @{
 	Name = "Computer name"
@@ -93,8 +92,7 @@ $Capacity = @{
 	Expression = {$_.Capacity / 1GB}
 }
 (Get-CimInstance -ClassName CIM_PhysicalMemory | Select-Object -Property Manufacturer, PartNumber, $Speed, $Capacity | Format-Table | Out-String).Trim()
-Write-Output ""
-Write-Output "Physical disks"
+Write-Output "`nPhysical disks"
 $Model = @{
 	Name = "Model"
 	Expression = {$_.FriendlyName}
