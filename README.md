@@ -1,1 +1,1 @@
-# PC-information
+# PC information
