@@ -1,3 +1,4 @@
+Clear-Host
 Write-Output User
 $PCName = @{
 	Name = "Computer name"
@@ -148,10 +149,22 @@ $VRAM = @{
 Write-Output "`nDefault IP gateway"
 (Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration).DefaultIPGateway
 Write-Output "`nWindows Defender threats"
-(Get-MpThreatDetection | Select-Object -Property Resources, ThreatID, InitialDetectionTime | Format-Table | Out-String).Trim()
+(Get-MpThreatDetection | ForEach-Object -Process {
+	[PSCustomObject] @{
+		"Path" = $_.Resources.Trim("{}").Replace("file:_", "")
+		"ThreatID" = $_.ThreatID
+		"Detection Time" = $_.InitialDetectionTime
+	}
+} | Sort-Object ThreatID -Unique | Format-Table -AutoSize -Wrap | Out-String).Trim()
 Write-Output "`nWindows Defender settings"
-$ThreatIDDefaultAction_Ids = @{
-	Name = "Excluded IDs"
-	Expression = {$_.ThreatIDDefaultAction_Ids}
-}
-(Get-MpPreference | Select-Object -Property ExclusionPath, $ThreatIDDefaultAction_Ids | Format-Table | Out-String).Trim()
+(Get-MpPreference | ForEach-Object -Process {
+	[PSCustomObject] @{
+		"Excluded IDs" = $_.ThreatIDDefaultAction_Ids | Out-String
+		"Excluded Process" = $_.ExclusionProcess | Out-String
+		"Controlled Folder Access" = $_.EnableControlledFolderAccess | Out-String
+		"Controlled Folder Access Protected Folders" = $_.ControlledFolderAccessProtectedFolders | Out-String
+		"Controlled Folder Access Allowed Applications" = $_.ControlledFolderAccessAllowedApplications | Out-String
+		"Excluded Extensions" = $_.ExclusionExtension | Out-String
+		"Excluded Paths" = $_.ExclusionPath | Out-String
+	}
+} | Format-List | Out-String).Trim()
