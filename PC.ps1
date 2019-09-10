@@ -38,6 +38,8 @@ $b = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows nt\CurrentVersion"
 	"Install Date" = $a."Install Date"
 	Architecture = $a.Architecture
 } | Out-String).Trim()
+Write-Output "`nRegistered apps list"
+(Get-Itemproperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*).DisplayName | Sort-Object
 Write-Output "`nInstalled updates supplied by CBS"
 $HotFixID = @{
 	Name = "KB ID"
@@ -151,7 +153,7 @@ Write-Output "`nDefault IP gateway"
 Write-Output "`nWindows Defender threats"
 (Get-MpThreatDetection | ForEach-Object -Process {
 	[PSCustomObject] @{
-		"Path" = $_.Resources.Trim("{}").Replace("file:_", "")
+		"Threat Path" = $_.Resources.Trim("{}").Replace("file:_", "")
 		"ThreatID" = $_.ThreatID
 		"Detection Time" = $_.InitialDetectionTime
 	}
