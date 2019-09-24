@@ -114,28 +114,28 @@ $BusType = @{
 }
 (Get-PhysicalDisk | Select-Object -Property $Model, $MediaType, $BusType, $Size | Format-Table | Out-String).Trim()
 Write-Output "`nLogical drives"
-Enum DriveType
-{
-	RemovableDrive	=	2
-	HardDrive		=	3
-}
 $Name = @{
 	Name = "Name"
 	Expression = {$_.DeviceID}
 }
+enum DriveType
+{
+	RemovableDrive	=	2
+	HardDrive		=	3
+}
 $Type = @{
 	Name = "Drive Type"
-	Expression = {[enum]::GetName([DriveType],$_.DriveType)}
-}
-$Path = @{
-	Name = "Path"
-	Expression = {$_.ProviderName}
+	Expression = {[System.Enum]::GetName([DriveType],$_.DriveType)}
 }
 $Size = @{
 	Name = "Size, GB"
 	Expression = {[math]::round($_.Size/1GB, 2)}
 }
-(Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object -FilterScript {$_.DriveType -ne 4} | Select-Object -Property $Name, $Type, $Path, $Size | Format-Table | Out-String).Trim()
+$FreeSpace = @{
+	Name = "FreeSpace, GB"
+	Expression = {[math]::round($_.FreeSpace/1GB, 2)}
+}
+(Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object -FilterScript {$_.DriveType -ne 4} | Select-Object -Property $Name, $Type, $Size, $FreeSpace | Format-Table | Out-String).Trim()
 Write-Output "`nMapped disks"
 (Get-SmbMapping | Select-Object -Property LocalPath, RemotePath | Format-Table | Out-String).Trim()
 Write-Output "`nVideo сontrollers"
@@ -153,7 +153,7 @@ Write-Output "`nDefault IP gateway"
 Write-Output "`nWindows Defender threats"
 (Get-MpThreatDetection | ForEach-Object -Process {
 	[PSCustomObject] @{
-		"Threat Path" = $_.Resources.Trim("{}").Replace("file:_", "")
+		"Detected Threats Paths" = $_.Resources.Trim("{}").Replace("file:_", "")
 		"ThreatID" = $_.ThreatID
 		"Detection Time" = $_.InitialDetectionTime
 	}
