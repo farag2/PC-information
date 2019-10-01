@@ -151,10 +151,26 @@ $VRAM = @{
 Write-Output "`nDefault IP gateway"
 (Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration).DefaultIPGateway
 Write-Output "`nWindows Defender threats"
+enum ThreatStatusID
+{
+	Unknown = 0
+	Detected = 1
+	Cleaned = 2
+	Quarantined = 3
+	Removed = 4
+	Allowed = 5
+	Blocked = 6
+	QuarantineFailed = 102
+	RemoveFailed = 103
+	AllowFailed = 104
+	Abondoned = 105
+	BlockedFailed = 107
+}
 (Get-MpThreatDetection | ForEach-Object -Process {
 	[PSCustomObject] @{
-		"Detected Threats Paths" = $_.Resources.Trim("{}").Replace("file:_", "")
+		"Detected Threats Paths" = $_.Resources
 		"ThreatID" = $_.ThreatID
+		"Status" = [System.Enum]::GetName([ThreatStatusID],$_.ThreatStatusID)
 		"Detection Time" = $_.InitialDetectionTime
 	}
 } | Sort-Object ThreatID -Unique | Format-Table -AutoSize -Wrap | Out-String).Trim()
