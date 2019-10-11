@@ -121,7 +121,7 @@ $Name = @{
 enum DriveType
 {
 	RemovableDrive	=	2
-	HardDrive		=	3
+	HardDrive	=	3
 }
 $Type = @{
 	Name = "Drive Type"
