@@ -1,4 +1,8 @@
+#Requires -RunAsAdministrator
+
 Clear-Host
+
+#region User
 Write-Output User
 $PCName = @{
 	Name = "Computer name"
@@ -13,6 +17,9 @@ $UserName = @{
 	Expression = {$_.UserName}
 }
 (Get-CimInstance –ClassName CIM_ComputerSystem | Select-Object -Property $PCName, $Domain, $UserName | Format-Table | Out-String).Trim()
+#endregion User
+
+#region Operating System
 Write-Output "`nOperating System"
 $ProductName = @{
 	Name = "Product Name"
@@ -38,7 +45,10 @@ $b = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows nt\CurrentVersion"
 	"Install Date" = $a."Install Date"
 	Architecture = $a.Architecture
 } | Out-String).Trim()
-Write-Output "`nRegistered apps list"
+#endregion Operating System
+
+#region Registered apps
+Write-Output "`nRegistered apps"
 (Get-Itemproperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*).DisplayName | Sort-Object
 Write-Output "`nInstalled updates supplied by CBS"
 $HotFixID = @{
@@ -50,6 +60,9 @@ $InstalledOn = @{
 	Expression = {$_.InstalledOn.Tostring().Split("")[0]}
 }
 (Get-HotFix | Select-Object -Property $HotFixID, $InstalledOn -Unique | Format-Table | Out-String).Trim()
+#endregion Registered apps
+
+#region Installed updates supplied by MSI/WU
 Write-Output "`nInstalled updates supplied by MSI/WU"
 $Session = New-Object -ComObject "Microsoft.Update.Session"
 $Searcher = $Session.CreateUpdateSearcher()
@@ -69,8 +82,14 @@ $Version = @{
 	Expression = {$_.Name}
 }
 (Get-CimInstance -ClassName CIM_BIOSElement | Select-Object -Property Manufacturer, $Version | Format-Table | Out-String).Trim()
+#endregion Installed updates supplied by MSI/WU
+
+#region Motherboard
 Write-Output "`nMotherboard"
 (Get-CimInstance -ClassName Win32_BaseBoard | Select-Object -Property Manufacturer, Product | Format-Table | Out-String).Trim()
+#endregion Motherboard
+
+#region CPU
 Write-Output "`nCPU"
 $Cores = @{
 	Name = "Cores"
@@ -85,6 +104,9 @@ $Threads = @{
 	Expression = {$_.NumberOfLogicalProcessors}
 }
 (Get-CimInstance -ClassName CIM_Processor | Select-Object -Property Name, $Cores, $L3CacheSize, $Threads | Format-Table | Out-String).Trim()
+#endregion CPU
+
+#region RAM
 Write-Output "`nRAM"
 $Speed = @{
 	Name = "Speed, MHz"
@@ -95,6 +117,9 @@ $Capacity = @{
 	Expression = {$_.Capacity / 1GB}
 }
 (Get-CimInstance -ClassName CIM_PhysicalMemory | Select-Object -Property Manufacturer, PartNumber, $Speed, $Capacity | Format-Table | Out-String).Trim()
+#endregion RAM
+
+#region Physical disks
 Write-Output "`nPhysical disks"
 $Model = @{
 	Name = "Model"
@@ -106,13 +131,16 @@ $MediaType = @{
 }
 $Size = @{
 	Name = "Size, GB"
-	Expression = {[math]::round($_.Size / 1GB, 2)}
+	Expression = {[math]::round($_.Size/1GB, 2)}
 }
 $BusType = @{
 	Name = "Bus type"
 	Expression = {$_.BusType}
 }
 (Get-PhysicalDisk | Select-Object -Property $Model, $MediaType, $BusType, $Size | Format-Table | Out-String).Trim()
+#endregion Physical disks
+
+#region Logical drives
 Write-Output "`nLogical drives"
 $Name = @{
 	Name = "Name"
@@ -136,20 +164,47 @@ $FreeSpace = @{
 	Expression = {[math]::round($_.FreeSpace/1GB, 2)}
 }
 (Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object -FilterScript {$_.DriveType -ne 4} | Select-Object -Property $Name, $Type, $Size, $FreeSpace | Format-Table | Out-String).Trim()
+#endregion Logical drives
+
+#region Mapped disks
 Write-Output "`nMapped disks"
 (Get-SmbMapping | Select-Object -Property LocalPath, RemotePath | Format-Table | Out-String).Trim()
-Write-Output "`nVideo сontrollers"
-$Caption = @{
-	Name = "Model"
-	Expression = {$_.Caption}
+#endregion Mapped disks
+
+#region Video сontrollers
+# Integrated graphics
+IF ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -eq "Internal"}))
+{
+	$Caption = @{
+		Name = "Model"
+		Expression = {$_.Caption}
+	}
+	$VRAM = @{
+		Name = "VRAM, GB"
+		Expression = {[math]::round($_.AdapterRAM/1GB)}
+	}
+	Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -eq "Internal"} | Select-Object -Property $Caption, $VRAM
 }
-$VRAM = @{
-	Name = "VRAM, GB"
-	Expression = {[math]::round($_.AdapterRAM/1GB)}
+# Dedicated graphics
+IF ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -ne "Internal"}))
+{
+	$qwMemorySize = (Get-ItemProperty -Path "HKLM:\SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0*" -Name HardwareInformation.qwMemorySize -ErrorAction SilentlyContinue)."HardwareInformation.qwMemorySize"
+	$VRAM = [math]::round($qwMemorySize/1GB)
+	Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -ne "Internal"} | ForEach-Object -Process {
+		[PSCustomObject] @{
+			Model = $_.Caption
+			"VRAM, GB" = $VRAM
+		}
+	}
 }
-(Get-CimInstance -ClassName CIM_VideoController | Select-Object -Property $Caption, $VRAM | Format-Table | Out-String).Trim()
+#endregion Video сontrollers
+
+#region Default IP gateway
 Write-Output "`nDefault IP gateway"
 (Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration).DefaultIPGateway
+#endregion Default IP gateway
+
+#region Windows Defender threats
 Write-Output "`nWindows Defender threats"
 enum ThreatStatusID
 {
@@ -174,6 +229,9 @@ enum ThreatStatusID
 		"Detection Time" = $_.InitialDetectionTime
 	}
 } | Sort-Object ThreatID -Unique | Format-Table -AutoSize -Wrap | Out-String).Trim()
+#endregion Windows Defender threats
+
+#region Windows Defender settings
 Write-Output "`nWindows Defender settings"
 (Get-MpPreference | ForEach-Object -Process {
 	[PSCustomObject] @{
@@ -186,3 +244,4 @@ Write-Output "`nWindows Defender settings"
 		"Excluded Paths" = $_.ExclusionPath | Out-String
 	}
 } | Format-List | Out-String).Trim()
+#endregion Windows Defender settings
