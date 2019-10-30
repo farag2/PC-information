@@ -20,7 +20,7 @@ $ProductName = @{
 }
 $InstallDate = @{
 	Name = "Install Date"
-	Expression={$_.InstallDate.Tostring().Split("")[0]}
+	Expression=  {$_.InstallDate.Tostring().Split("")[0]}
 }
 $Arch = @{
 	Name = "Architecture"
