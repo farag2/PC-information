@@ -77,13 +77,16 @@ $Date = @{
 	Expression = {$_.Date.Tostring().Split("")[0]}
 }
 ($Searcher.QueryHistory(0, $historyCount) | Where-Object -FilterScript {$_.Title -like "*KB*"} | Select-Object $KB, $Date -Unique | Format-Table | Out-String).Trim()
+#endregion Updates
+
+#region BIOS
 Write-Output "`nBIOS"
 $Version = @{
 	Name = "Version"
 	Expression = {$_.Name}
 }
 (Get-CimInstance -ClassName CIM_BIOSElement | Select-Object -Property Manufacturer, $Version | Format-Table | Out-String).Trim()
-#endregion Updates
+#endregion BIOS
 
 #region Motherboard
 Write-Output "`nMotherboard"
