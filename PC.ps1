@@ -50,6 +50,9 @@ $b = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows nt\CurrentVersion"
 #region Registered apps
 Write-Output "`nRegistered apps"
 (Get-Itemproperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*, HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*).DisplayName | Sort-Object
+#endregion Registered apps
+
+#region Updates
 Write-Output "`nInstalled updates supplied by CBS"
 $HotFixID = @{
 	Name = "KB ID"
@@ -60,9 +63,7 @@ $InstalledOn = @{
 	Expression = {$_.InstalledOn.Tostring().Split("")[0]}
 }
 (Get-HotFix | Select-Object -Property $HotFixID, $InstalledOn -Unique | Format-Table | Out-String).Trim()
-#endregion Registered apps
 
-#region Installed updates supplied by MSI/WU
 Write-Output "`nInstalled updates supplied by MSI/WU"
 $Session = New-Object -ComObject "Microsoft.Update.Session"
 $Searcher = $Session.CreateUpdateSearcher()
@@ -82,7 +83,7 @@ $Version = @{
 	Expression = {$_.Name}
 }
 (Get-CimInstance -ClassName CIM_BIOSElement | Select-Object -Property Manufacturer, $Version | Format-Table | Out-String).Trim()
-#endregion Installed updates supplied by MSI/WU
+#endregion Updates
 
 #region Motherboard
 Write-Output "`nMotherboard"
