@@ -76,7 +76,7 @@ $Date = @{
 	Name = "Installed on"
 	Expression = {$_.Date.Tostring().Split("")[0]}
 }
-($Searcher.QueryHistory(0, $historyCount) | Where-Object -FilterScript {$_.Title -like "*KB*"} | Select-Object $KB, $Date -Unique | Format-Table | Out-String).Trim()
+($Searcher.QueryHistory(0, $historyCount) | Where-Object -FilterScript {$_.Title -like "*KB*" -and $_.ResultCode -eq 2} | Select-Object $KB, $Date -Unique | Format-Table | Out-String).Trim()
 #endregion Updates
 
 #region BIOS
