@@ -112,6 +112,11 @@ Write-Output "`nMapped disks"
 (Get-SmbMapping | Select-Object -Property LocalPath, RemotePath | Format-Table | Out-String).Trim()
 #endregion Mapped disks
 
+#region Printers
+Write-Output "`nPrinters"
+Get-CimInstance -ClassName CIM_Printer | Select-Object -Property Name, Default, PortName, DriverName, ShareName | Format-Table
+#endregion Printers
+
 #region Network
 Write-Output "`nDefault IP gateway"
 (Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration).DefaultIPGateway
