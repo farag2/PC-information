@@ -81,6 +81,32 @@ $Date = @{
 ($Searcher.QueryHistory(0, $historyCount) | Where-Object -FilterScript {$_.Title -like "*KB*" -and $_.ResultCode -eq 2} | Select-Object $KB, $Date | Format-Table | Out-String).Trim()
 #endregion Updates
 
+#region Logical drives
+Write-Output "`nLogical drives"
+$Name = @{
+	Name = "Name"
+	Expression = {$_.DeviceID}
+}
+enum DriveType
+{
+	RemovableDrive	=	2
+	HardDrive	=	3
+}
+$Type = @{
+	Name = "Drive Type"
+	Expression = {[System.Enum]::GetName([DriveType],$_.DriveType)}
+}
+$Size = @{
+	Name = "Size, GB"
+	Expression = {[math]::round($_.Size/1GB, 2)}
+}
+$FreeSpace = @{
+	Name = "FreeSpace, GB"
+	Expression = {[math]::round($_.FreeSpace/1GB, 2)}
+}
+(Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object -FilterScript {$_.DriveType -ne 4} | Select-Object -Property $Name, $Type, $Size, $FreeSpace | Format-Table | Out-String).Trim()
+#endregion Logical drives
+
 #region Mapped disks
 Write-Output "`nMapped disks"
 (Get-SmbMapping | Select-Object -Property LocalPath, RemotePath | Format-Table | Out-String).Trim()
