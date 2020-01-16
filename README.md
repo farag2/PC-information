@@ -1,14 +1,14 @@
 # Overview
 Get almost PC's full specifications
 
-## Retrieving information about PC hardware
+## Retrieving PC hardware information
  - BIOS
  - Motherboard
  - RAM
  - Physical disks
  - Video сontrollers
 
-## Retrieving information about PC hardware
+## Retrieving OS specification
  - User
  - Operating System
  - Registered apps
