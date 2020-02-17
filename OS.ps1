@@ -1,4 +1,4 @@
-#region User
+﻿#region User
 Write-Output User
 $PCName = @{
 	Name = "Computer name"
