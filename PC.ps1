@@ -58,7 +58,7 @@ $MediaType = @{
 }
 $Size = @{
 	Name = "Size, GB"
-	Expression = {[math]::round($_.Size/1GB, 2)}
+	Expression = {[math]::round($_.Size / 1GB, 2)}
 }
 $BusType = @{
 	Name = "Bus type"
@@ -69,7 +69,7 @@ $BusType = @{
 
 #region Video сontrollers
 # Integrated graphics
-IF ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -eq "Internal"}))
+if ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -eq "Internal"}))
 {
 	$Caption = @{
 		Name = "Model"
@@ -77,15 +77,15 @@ IF ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript
 	}
 	$VRAM = @{
 		Name = "VRAM, GB"
-		Expression = {[math]::round($_.AdapterRAM/1GB)}
+		Expression = {[math]::round($_.AdapterRAM / 1GB)}
 	}
 	Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -eq "Internal"} | Select-Object -Property $Caption, $VRAM
 }
 # Dedicated graphics
-IF ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -ne "Internal"}))
+if ((Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -ne "Internal"}))
 {
 	$qwMemorySize = Get-ItemPropertyValue -Path "HKLM:\SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}\0*" -Name HardwareInformation.qwMemorySize
-	$VRAM = [math]::round($qwMemorySize/1GB)
+	$VRAM = [math]::round($qwMemorySize / 1GB)
 	Get-CimInstance -ClassName CIM_VideoController | Where-Object -FilterScript {$_.AdapterDACType -ne "Internal"} | ForEach-Object -Process {
 		[PSCustomObject] @{
 			Model = $_.Caption
