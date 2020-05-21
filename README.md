@@ -1,7 +1,9 @@
 # Overview
+
 Get almost PC's full specifications
 
 ## Retrieving PC hardware information
+
 - BIOS
 - Motherboard
 - RAM
@@ -9,6 +11,7 @@ Get almost PC's full specifications
 - Video сontrollers
 
 ## Retrieving OS specification
+
 - User
 - Operating System
 - Registered apps
@@ -21,7 +24,9 @@ Get almost PC's full specifications
 - Windows Defender settings
 
 ## PC.cmd
+
 - Stripped down version of PowerShell based version for basic functions.
 
 ## NB
+
 Check whether file is encoded in **UTF-8 with BOM**.
