@@ -120,6 +120,8 @@ Get-CimInstance -ClassName CIM_Printer | Select-Object -Property Name, Default, 
 #region Network
 Write-Output "`nDefault IP gateway"
 (Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration).DefaultIPGateway
+Write-Output "`nDNS"
+(Get-DnsClientServerAddress).ServerAddresses
 #endregion Network
 
 #region Windows Defender threats
