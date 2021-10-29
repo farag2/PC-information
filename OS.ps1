@@ -65,29 +65,21 @@ Write-Output "`nRegistered apps"
 
 #region Updates
 Write-Output "`nInstalled updates supplied by CBS"
-$HotFixID = @{
-	Name = "KB ID"
-	Expression = {$_.HotFixID}
-}
-$InstalledOn = @{
-	Name       = "Installed on"
-	Expression = {$_.InstalledOn.Tostring().Split("")[0]}
-}
-(Get-HotFix | Select-Object -Property $HotFixID, $InstalledOn -Unique | Format-Table | Out-String).Trim()
-
-Write-Output "`nInstalled updates supplied by MSI/WU"
-$Session = New-Object -ComObject "Microsoft.Update.Session"
+$Session = New-Object -ComObject Microsoft.Update.Session
 $Searcher = $Session.CreateUpdateSearcher()
 $historyCount = $Searcher.GetTotalHistoryCount()
+
 $KB = @{
 	Name       = "KB ID"
 	Expression = {[regex]::Match($_.Title,"(KB[0-9]{6,7})").Value}
 }
 $Date = @{
-	Name       = "Installed on"
-	Expression = {$_.Date.Tostring().Split("")[0]}
+	Name       = "Installed Date"
+	Expression = {$_.Date.Tostring().Split("") | Select-Object -Index 0}
 }
-($Searcher.QueryHistory(0, $historyCount) | Where-Object -FilterScript {$_.Title -like "*KB*" -and $_.ResultCode -eq 2} | Select-Object $KB, $Date | Format-Table | Out-String).Trim()
+($Searcher.QueryHistory(0, $historyCount) | Where-Object -FilterScript {
+	($_.Title -cmatch "KB") -and ($_.Title -notmatch "Defender") -and ($_.ResultCode -eq 2)
+} | Select-Object $KB, $Date | Format-Table | Out-String).Trim()
 #endregion Updates
 
 #region Logical drives
