@@ -64,6 +64,17 @@ Write-Output "`nRegistered apps"
 #endregion Registered apps
 
 #region Updates
+$HotFixID = @{
+$Session = New-Object -ComObject Microsoft.Update.Session
+	Name = "KB ID"
+	Expression = {$_.HotFixID}
+}
+$InstalledOn = @{
+	Name       = "Installed on"
+	Expression = {$_.InstalledOn.Tostring().Split("")[0]}
+}
+(Get-HotFix | Select-Object -Property $HotFixID, $InstalledOn -Unique | Format-Table | Out-String).Trim()
+
 Write-Output "`nInstalled updates supplied by CBS"
 $Session = New-Object -ComObject Microsoft.Update.Session
 $Searcher = $Session.CreateUpdateSearcher()
